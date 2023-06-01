@@ -34,7 +34,7 @@ export const Text = styled.h1`
   max-width: 80%;
 `
 
-export const GroupOptions = styled.fieldset`
+export const QuestionOptions = styled.fieldset`
   display: flex;
   align-items: center;
   justify-content: space-evenly;

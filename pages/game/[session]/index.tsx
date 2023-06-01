@@ -24,7 +24,7 @@ export const Playing:FC = () => {
                 '4': 'unanswared',
               }
             })
-            push(`${session}/playing`, undefined, { shallow: true })
+            push(`${session}/playing/1`, undefined, { shallow: true })
           }
         })
         .catch(err => console.log({ err }))

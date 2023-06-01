@@ -20,7 +20,6 @@ export const OptionWrapper = styled.div<IOptionWrapper>`
   > label {
     color: white;
     text-align: justify;
-    
   }
 `
 

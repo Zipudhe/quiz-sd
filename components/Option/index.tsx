@@ -14,7 +14,7 @@ const Option: FC<IOption> = ({ checked = false, text, ...props }) => {
       <label  htmlFor={id}>
         {text}
       </label>
-      <Input id={id} type={'checkbox'} checked={checked} />
+      <Input id={id} type={'checkbox'} defaultChecked={checked} />
     </OptionWrapper>
   )
 }
