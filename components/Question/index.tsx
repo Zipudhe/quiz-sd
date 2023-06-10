@@ -1,23 +1,24 @@
-import React, { FC, MouseEventHandler, useState } from 'react'
-import { Wrapper, Form, Text, QuestionOptions } from './style'
+import React, { FC, useContext, useState } from 'react'
+import { Form, Text, QuestionOptions } from './style'
+import { useRouter } from 'next/router'
 
 import Option from '../Option'
+
+import { PostAnswer, Question } from '../../api/Question'
+
 
 type selectControl = {
   [x: string]: boolean
 }
 
-type Option = {
-  id: number,
-  text: string
+interface IQuestion {
+  questao: Question
 }
 
-type Question = {
-  statement: string,
-  options: Option[]
-}
-
-const Question: FC<Question> = ({ statement, options }) => {
+const Question: FC<IQuestion> = ({ questao }) => {
+  const { answer, options, statment } = questao
+  const [disabled, setDisable] = useState(false)
+  const { query: { session, id } } = useRouter()
 
   const defaultControl = {
     '1': false,
@@ -29,26 +30,40 @@ const Question: FC<Question> = ({ statement, options }) => {
   const [selectControl, setSelectControl] = useState<selectControl>(defaultControl)
   //@ts-ignore
   const handleClick = (e: MouseEvent<HTMLDivElement, MouseEvent>) => {
-    console.log('clicked: ', e.target.id)
-    setSelectControl((prevState) => {
-      const id = e.target.id as string
-      const updated = { ...defaultControl, [id]: true }
-      return updated
-    })
+    const id_clicked = e.target.id as string
+    console.log({ id_clicked })
+    setDisable(true)
+    if(!disabled) {
+      setSelectControl((prevState) => {
+        const updated = { ...defaultControl, [id_clicked]: true }
+        return updated
+      })
+
+      if(session && id) {
+        console.log('should post answer')
+        PostAnswer(id_clicked, session as string, id as string)
+          .then(res => {
+            console.log('OK')
+          })
+          .catch(err => {
+            console.error('failed to send answer')
+          })
+      }
+    }
   }
+
 
   return (
     <>
       <Form id='control'>
         <Text>
-          { statement }
+          { statment }
         </Text>
         {/* TODO: Agrupar esses inputs em um componente só  */}
         <QuestionOptions form='control' >
           {
-            options.map((option, index) => <Option key={index} id={`${option.id}`} text={option.text} checked={selectControl[`${option.id}`]} onClick={handleClick} form="control" />)
+            options && options.map((opcao, index) => <Option disabled={disabled} key={index} id={`${index}`} text={opcao} checked={selectControl[index.toString()]} onClick={handleClick} form="control" />)
           }          
-          
         </QuestionOptions>
       </Form>
     </>

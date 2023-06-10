@@ -7,14 +7,14 @@ interface IOption extends AllHTMLAttributes<HTMLDivElement> {
 }
 
 const Option: FC<IOption> = ({ checked = false, text, ...props }) => {
-  const { id } = props
+  const { id, disabled } = props
 
   return (
     <OptionWrapper {...props} checked={checked} >
       <label  htmlFor={id}>
         {text}
       </label>
-      <Input id={id} type={'checkbox'} defaultChecked={checked} />
+      <Input id={id} disabled={disabled} type={'checkbox'} defaultChecked={checked} />
     </OptionWrapper>
   )
 }

@@ -16,11 +16,12 @@ export const StateContext = createContext<StateProvider>({}  as StateProvider)
 
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
+
   const defaultState = {
     '1': 'connected',
     '2': 'disconnected',
     '3': 'disconnected',
-    '4': 'disconnected',
+    '4': 'disconnected'
   } as StateType
   
   var state = useState<StateType>(defaultState)

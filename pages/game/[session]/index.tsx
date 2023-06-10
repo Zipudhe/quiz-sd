@@ -5,34 +5,57 @@ import Layout from '../../../components/Layouts/gameLayout'
 import Button from '../../../components/Button'
 import { StateContext } from '../../../Context/stateProvider'
 
-import { PutSession } from '../../../api/Session'
+import { PutSession, StartSession } from '../../../api/Session'
 
 export const Playing:FC = () => {
-
-  const { query: { session }, push} = useRouter()
+  const { query: { session }, push } = useRouter()
   const [_, setState] = useContext(StateContext)
   const handleClick = () => {
-    if(session && typeof session == 'string') {
-      PutSession(session)
-        .then((session) => {
-          if(session) {
-            setState(() => {
-              return {
-                '1': 'unanswared',
-                '2': 'unanswared',
-                '3': 'unanswared',
-                '4': 'unanswared',
-              }
-            })
-            push(`${session}/playing/1`, undefined, { shallow: true })
-          }
-        })
-        .catch(err => console.log({ err }))
-    }
+    console.log('starting session')
+    StartSession(session as string)
+      .catch(err => {
+        console.log('failed to start session')
+      })
   }
-
+  
   useEffect(() => {
-    //TODO PUT request do create/joing session
+    if(session != 'undefined' && typeof session == 'string') {
+      const subscription = new EventSource(`http://localhost:5000/subscribe/${session}`)
+
+      subscription.onopen = (res) => console.log('Opened subscribe event')
+      subscription.addEventListener('joined', (e) => {
+        console.log('Joined event listener: ')
+        console.log(e)
+      })
+
+      const startEvent = new EventSource(`http://localhost:5000/subscribe/start/${session}`)
+  
+      startEvent.onopen = (res) => console.log('Opened start event')
+      startEvent.addEventListener('start', (e) => {
+        console.log('start event!')
+        push(`/game/${session}/playing/1`)
+        startEvent.close()
+      })
+  
+      PutSession(session)
+        .then((id) => {
+          console.log({ id })
+          push(`/game/${session}/playing/1`)
+        })
+        .catch(err => {
+          console.log('something went wrong creating session. ', err)
+        })
+  
+
+      subscription.onerror = (error) => console.log({ error })
+
+      return () => {
+        console.log('should close connection')
+        subscription.close()
+        startEvent.close()
+      }
+    }
+
   }, [session])
 
   return (

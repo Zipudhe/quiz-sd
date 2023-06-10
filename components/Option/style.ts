@@ -19,7 +19,12 @@ export const OptionWrapper = styled.div<IOptionWrapper>`
 
   > label {
     color: white;
-    text-align: justify;
+    text-align: center;
+    line-height: 150%;
+  }
+
+  :disabled {
+    background-color: 'gray';
   }
 `
 

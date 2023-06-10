@@ -2,14 +2,16 @@ import React, { FC, useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
 
 import Layout from '../../../../components/Layouts/gameLayout'
-import Game from '../../../../components/Question'
+import Question from '../../../../components/Question'
+
+import { GetQuestion, Question as TypeQuestion } from '../../../../api/Question'
 
 export const Playing:FC = () => {
 
   const [timer, setTimer] = useState(20)
   const [preparing, setPreparing] = useState(false)
-
-  console.log({ preparing })
+  //@ts-ignore
+  const [question, setQuestion] = useState<TypeQuestion>({})
   
   const { query: { id, session } , push } = useRouter()
   //@ts-ignore
@@ -22,27 +24,28 @@ export const Playing:FC = () => {
 
   useEffect(() => {
     setPreparing(false)
-  }, [id])
+    if(!preparing) {
+      // Subscribes to another players answers
+      const awnsered = new EventSource(`http://localhost:5000/subscribe/${session}/question/${id}`)
+      awnsered.onopen = () => console.log('subscribed to question')
+      awnsered.addEventListener('anwser', () => {
+        console.log('a user has anwsered')
+      })
 
-  const mockedOptions = [
-    {
-      id: 1,
-      text: "Texto da opção"
-    },
-    {
-      id: 2,
-      text: "Texto da opção"
-    },
-    {
-      id: 3,
-      text: "Texto da opção"
-    },
-    {
-      id: 4,
-      text: "Texto da opção"
+      // get questions
+      GetQuestion()
+        .then((question) => {
+          setQuestion(question)
+          console.log(question.answer)
+        })
+        .catch(err => {
+          console.error({ err })
+        })
+
+      return () => awnsered.close()
     }
-]
-  const statement = "Texto de pergunta sobre o tópico de sistemas distribuidos que vem com algumas opções de repostas"
+  }, [id, preparing, session])
+
 
   if(timer == 0 && !preparing) {
     setPreparing(true)
@@ -68,10 +71,19 @@ export const Playing:FC = () => {
     )
   }
 
+  if(!question) {
+    return (
+      <Layout>
+        <h1> Loading... </h1>
+        <h1> Computando resultados... </h1>
+      </Layout>
+    )
+  }
+
   return (
     <Layout>
       <h1> { timer } </h1>
-      <Game options={mockedOptions} statement={statement} />
+      <Question questao={question} />
     </Layout>
   )
 }
