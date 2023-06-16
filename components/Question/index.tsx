@@ -28,6 +28,13 @@ const Question: FC = () => {
     '4': false,
   }
   
+  /* `useEffect` is a React hook that allows you to perform side effects in function components. In
+  this case, the `useEffect` hook is being used to fetch a question from the server using the
+  `GetQuestion` function and update the `question` state with the fetched question using the
+  `setQuestion` function. The `console.log` statement is used to log the answer of the fetched
+  question to the console. The `useEffect` hook is also returning a cleanup function that sets the
+  `disabled` state to `false`. The `useEffect` hook is triggered whenever the `id` dependency
+  changes. */
   useEffect(() => {
     GetQuestion()
       .then((question) => {
@@ -44,7 +51,13 @@ const Question: FC = () => {
   console.log({ answer: question.answer })
 
   const [selectControl, setSelectControl] = useState<selectControl>(defaultControl)
-  //@ts-ignore
+  /*
+  `handleClick` is a function that is called when an option is clicked in the question form.
+  It updates the `selectControl` state to mark the clicked option as selected and sends a POST
+  request to the server with the selected option if the user is logged in. It also sets the
+  `disabled` state to true to prevent further clicks until the question is changed. 
+  */
+ //@ts-ignore
   const handleClick = (e: MouseEvent<HTMLDivElement, MouseEvent>) => {
     const id_clicked = e.target.id as string
     console.log({ answer: question.answer, id_clicked })

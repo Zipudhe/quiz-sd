@@ -10,8 +10,12 @@ import { PutSession, StartSession } from '../../../api/Session'
 export const Playing:FC = () => {
   const { query: { session }, push } = useRouter()
   const [_, setState] = useContext(StateContext)
+  
+/**
+ * This function handles a click event and starts a game session, redirecting the user to the
+ * preparation page.
+ */
   const handleClick = () => {
-    console.log('starting session')
     StartSession(session as string)
       .then(() => {
         push({ pathname: `/game/${session}/prepare`, query: { nextQuestion: 1, session } }, `/game/${session}/prepare`)
@@ -21,6 +25,10 @@ export const Playing:FC = () => {
       })
   }
   
+  /* This `useEffect` hook is setting up a subscription to an event source using the `EventSource` API.
+  It first checks if the `session` query parameter is defined and of type string, and if so, creates
+  a new `EventSource` instance with the URL `http://localhost:5000/subscribe/`. It then
+  sets up an event listener for the `joined` event and logs the event object when it is triggered. */
   useEffect(() => {
     if(session != 'undefined' && typeof session == 'string') {
       const subscription = new EventSource(`http://localhost:5000/subscribe/${session}`)
