@@ -3,15 +3,16 @@ import { OptionWrapper, Input } from './style'
 
 interface IOption extends AllHTMLAttributes<HTMLDivElement> {
   checked?: boolean,
-  text: string
+  text: string,
+  answer: number,
 }
 
-const Option: FC<IOption> = ({ checked = false, text, ...props }) => {
+const Option: FC<IOption> = ({ checked = false, text, answer, ...props }) => {
   const { id, disabled } = props
 
   return (
-    <OptionWrapper {...props} checked={checked} >
-      <label  htmlFor={id}>
+    <OptionWrapper {...props} checked={checked} answer={answer} id={id} >
+      <label htmlFor={id}>
         {text}
       </label>
       <Input id={id} disabled={disabled} type={'checkbox'} defaultChecked={checked} />

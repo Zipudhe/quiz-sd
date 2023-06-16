@@ -13,6 +13,9 @@ export const Playing:FC = () => {
   const handleClick = () => {
     console.log('starting session')
     StartSession(session as string)
+      .then(() => {
+        push({ pathname: `/game/${session}/prepare`, query: { nextQuestion: 1, session } }, `/game/${session}/prepare`)
+      })
       .catch(err => {
         console.log('failed to start session')
       })
@@ -33,14 +36,13 @@ export const Playing:FC = () => {
       startEvent.onopen = (res) => console.log('Opened start event')
       startEvent.addEventListener('start', (e) => {
         console.log('start event!')
-        push(`/game/${session}/playing/1`)
+        // push(`/game/${session}/playing/1`)
         startEvent.close()
       })
   
       PutSession(session)
         .then((id) => {
           console.log({ id })
-          push(`/game/${session}/playing/1`)
         })
         .catch(err => {
           console.log('something went wrong creating session. ', err)

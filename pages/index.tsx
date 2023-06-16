@@ -13,14 +13,14 @@ export const Home: NextPageWithLayout = (pageProps) => {
   const handler = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     if(input.current) {
-      router.push(`/game/${input.current.value}`)
+      router.push(`/game/${input.current.value.trim()}`)
     }
   }
 
   return (
     <div>
       <form onSubmit={handler} >
-        <label htmlFor='session' >
+        <label htmlFor='session' style={{ color: 'white' }} >
           quiz-sd.vercel.app/game/
           <input ref={input} id="session" name="session" />
         </label>

@@ -12,7 +12,7 @@ interface QuestionResponse {
 }
 
 export const PostAnswer = (answer: string, session: string, question: string) => {
-  return api.post('/question/answer', { session, question, answer })
+  return api.post('/answer', { session, question, answer })
 }
 
 export const GetQuestion = async () => {

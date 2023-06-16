@@ -1,10 +1,10 @@
-import React, { FC, useContext, useState } from 'react'
+import React, { FC, Suspense, useEffect, useState } from 'react'
 import { Form, Text, QuestionOptions } from './style'
 import { useRouter } from 'next/router'
 
 import Option from '../Option'
 
-import { PostAnswer, Question } from '../../api/Question'
+import { PostAnswer, Question, GetQuestion } from '../../api/Question'
 
 
 type selectControl = {
@@ -15,10 +15,11 @@ interface IQuestion {
   questao: Question
 }
 
-const Question: FC<IQuestion> = ({ questao }) => {
-  const { answer, options, statment } = questao
+const Question: FC = () => {
+  //@ts-ignore
+  const [question, setQuestion] = useState<Question>({})
   const [disabled, setDisable] = useState(false)
-  const { query: { session, id } } = useRouter()
+  const { query: { session, id }, push } = useRouter()
 
   const defaultControl = {
     '1': false,
@@ -27,11 +28,26 @@ const Question: FC<IQuestion> = ({ questao }) => {
     '4': false,
   }
   
+  useEffect(() => {
+    GetQuestion()
+      .then((question) => {
+        setQuestion(question)
+        console.log(question.answer)
+      })
+      .catch(err => {
+        console.error({ err })
+      })
+
+      return () => setDisable(false)
+  }, [id])
+
+  console.log({ answer: question.answer })
+
   const [selectControl, setSelectControl] = useState<selectControl>(defaultControl)
   //@ts-ignore
   const handleClick = (e: MouseEvent<HTMLDivElement, MouseEvent>) => {
     const id_clicked = e.target.id as string
-    console.log({ id_clicked })
+    console.log({ answer: question.answer, id_clicked })
     setDisable(true)
     if(!disabled) {
       setSelectControl((prevState) => {
@@ -52,21 +68,36 @@ const Question: FC<IQuestion> = ({ questao }) => {
     }
   }
 
+  //TODO Arrumar esquema de resposta de perguntas
 
   return (
-    <>
+    <Suspense fallback={<h1 style={{ color: 'white' }} > Loading... </h1> } >
       <Form id='control'>
         <Text>
-          { statment }
+          { question.statment }
         </Text>
-        {/* TODO: Agrupar esses inputs em um componente só  */}
         <QuestionOptions form='control' >
           {
-            options && options.map((opcao, index) => <Option disabled={disabled} key={index} id={`${index}`} text={opcao} checked={selectControl[index.toString()]} onClick={handleClick} form="control" />)
+            question.options && question.options.map((opcao, index) => {
+              const id = index + 1
+              return (
+                <Option 
+                  form="control"
+                  disabled={disabled}
+                  answer={question.answer}
+                  key={index}
+                  id={`${index}`}
+                  tabIndex={id}
+                  text={opcao}
+                  checked={selectControl[index.toString()]}
+                  onClick={handleClick}
+                />
+              )
+            })
           }          
         </QuestionOptions>
       </Form>
-    </>
+    </Suspense>
   )
 }
 

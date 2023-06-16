@@ -1,14 +1,21 @@
 import styled from 'styled-components'
 
 interface IOptionWrapper  {
-  checked: boolean
+  checked: boolean,
+  answer: Number,
 }
 
 export const OptionWrapper = styled.div<IOptionWrapper>`
-  height: 160px;
+  height: fit-content;
+  min-height: 160px;
   width: 160px;
   border-radius: 4px;
-  background-color: ${({ checked }) => checked ? 'green' : 'blue'};
+  background-color: ${({ checked, id, answer, tabIndex }) => {
+    if(!checked) {
+      return 'blue'
+    }
+    return answer == tabIndex ? 'green' : 'red';
+  }};
   display: grid;
   place-items: center;
   padding: 10px;
@@ -21,10 +28,11 @@ export const OptionWrapper = styled.div<IOptionWrapper>`
     color: white;
     text-align: center;
     line-height: 150%;
+    pointer-events: none;
   }
 
   :disabled {
-    background-color: 'gray';
+    border: 1px solid gray;
   }
 `
 

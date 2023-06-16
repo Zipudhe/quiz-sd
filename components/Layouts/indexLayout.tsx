@@ -12,7 +12,7 @@ export const Layout:FC<ILayout> = ({ children }) => (
         height: '100vh',
         display: 'grid',
         placeItems: 'center',
-        background: 'gray',
+        background: '#050505',
       }
     } >
     { children }
