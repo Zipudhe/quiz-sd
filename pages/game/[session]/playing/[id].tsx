@@ -1,13 +1,23 @@
-import React, { FC, useState, useEffect } from 'react'
+import React, { FC, useState, useEffect, useContext, useRef } from 'react'
 import { useRouter } from 'next/router'
 
 import Layout from '../../../../components/Layouts/gameLayout'
-import Question from '../../../../components/Question'
+import Question, { MyQuestion } from '../../../../components/Question'
+
+import { StateContext, StateType, defaultState } from '../../../../Context/stateProvider'
+import { Question as IQuestion, GetQuestion } from '../../../../api/Question'
+
 
 export const Playing:FC = () => {
 
-  const [timer, setTimer] = useState(30)
+  const timeRef = useRef<NodeJS.Timer>()
+
+  const [timer, setTimer] = useState(20)
+  const [state, setState] = useContext(StateContext)
   //@ts-ignore
+  const [question, setQuestion] = useState<MyQuestion>({})
+
+  let qtdAnsers = 0;
   
   const { query: { id, session }, push } = useRouter()
   const nextQuestion = Number.parseInt(id as string) + 1
@@ -18,9 +28,16 @@ export const Playing:FC = () => {
   it reaches 0. The `useEffect` hook also returns a cleanup function that clears the interval when the
   component unmounts or when the `id` prop changes. */
   useEffect(() => {
-    const time = setInterval(() => setTimer(prevTimer => prevTimer > 0 ? prevTimer -= 1 : 0), 200)
-    return () => clearInterval(time)
-  }, [id])
+    GetQuestion()
+    .then(({ question, requestServerTime}) => {
+      setQuestion({...question, serverTime: requestServerTime})
+      timeRef.current = setInterval(() => setTimer(prevTimer => prevTimer > 0 ? prevTimer -= 1 : 0), 1000)
+    })
+    .catch(err => {
+      console.error({ err })
+    })
+    return () => clearInterval(timeRef.current)
+  }, [])
 
   /* This code block is using the `useEffect` hook to subscribe to a server-sent event (SSE) stream for
   receiving answers from other players. It creates a new `EventSource` object with a URL that includes
@@ -31,18 +48,31 @@ export const Playing:FC = () => {
   `id` or `session` props change. */
   useEffect(() => {
       // Subscribes to another players answers
+      console.log('subscribing to question....')
       const awnsered = new EventSource(`http://localhost:5000/subscribe/${session}/question/${id}`)
       awnsered.onopen = () => console.log('subscribed to question')
       awnsered.addEventListener('anwser', () => {
         console.log('a user has anwsered')
+        // every time someone awnsers add 1
+        if(qtdAnsers < 4) {
+          qtdAnsers++
+        }
+        
+        setState(prevState => {
+          const currentState = {} as StateType
+          for(let i = 1; i <= qtdAnsers; i++) {
+            currentState[i] = 'answared'
+          }
+
+          return currentState
+        })
       })
 
       return () => {
+        setState(defaultState)
         awnsered.close()
       }
   }, [id, session])
-
-
         
   /* This code block is checking if the `timer` state has reached 0. If it has, it logs an object to the
   console with the `id` prop parsed as an integer. It then checks if the `id` prop parsed as an
@@ -51,7 +81,6 @@ export const Playing:FC = () => {
   to navigate to the `/game//prepare` path with a `nextQuestion` query parameter and a
   fallback URL of `/game//prepare`. */
   if(timer == 0 ) {
-    console.log({ id: Number.parseInt(id as string) })
     Number.parseInt(id as string) >= 10 ?
       push({ pathname: `/game/${session}/ranking` })
       :
@@ -61,7 +90,7 @@ export const Playing:FC = () => {
   return (
     <Layout>
       <h1> { timer } </h1>
-      <Question />
+      <Question question={question} />
     </Layout>
   )
 }

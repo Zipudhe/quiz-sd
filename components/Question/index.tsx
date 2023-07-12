@@ -11,46 +11,31 @@ type selectControl = {
   [x: string]: boolean
 }
 
-interface IQuestion {
-  questao: Question
+export type MyQuestion = Question & {
+  serverTime: number
 }
 
-const Question: FC = () => {
-  //@ts-ignore
-  const [question, setQuestion] = useState<Question>({})
-  const [disabled, setDisable] = useState(false)
-  const { query: { session, id }, push } = useRouter()
+interface IQuestion {
+  question?: MyQuestion,
+}
 
+const Question: FC<IQuestion> = ({ question }) => {
   const defaultControl = {
     '1': false,
     '2': false,
     '3': false,
     '4': false,
   }
-  
-  /* `useEffect` is a React hook that allows you to perform side effects in function components. In
-  this case, the `useEffect` hook is being used to fetch a question from the server using the
-  `GetQuestion` function and update the `question` state with the fetched question using the
-  `setQuestion` function. The `console.log` statement is used to log the answer of the fetched
-  question to the console. The `useEffect` hook is also returning a cleanup function that sets the
-  `disabled` state to `false`. The `useEffect` hook is triggered whenever the `id` dependency
-  changes. */
-  useEffect(() => {
-    GetQuestion()
-      .then((question) => {
-        setQuestion(question)
-        console.log(question.answer)
-      })
-      .catch(err => {
-        console.error({ err })
-      })
-
-      return () => setDisable(false)
-  }, [id])
-
-  console.log({ answer: question.answer })
-
+  const [disabled, setDisable] = useState(false)
   const [selectControl, setSelectControl] = useState<selectControl>(defaultControl)
+
+  const { query: { session, id } } = useRouter()
+
+
+  if(!question) {
+    return (<h1 style={{ color: 'white' }} > Formulando pergunta.... </h1> )
+  }
+  
   /*
   `handleClick` is a function that is called when an option is clicked in the question form.
   It updates the `selectControl` state to mark the clicked option as selected and sends a POST
@@ -59,8 +44,17 @@ const Question: FC = () => {
   */
  //@ts-ignore
   const handleClick = (e: MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const id_clicked = e.target.id as string
-    console.log({ answer: question.answer, id_clicked })
+    const id_clicked = Number.parseInt(e.target.id) as number
+
+    const anwserData = {
+      correct: question.answer == id_clicked + 1,
+      session: session as string,
+      question: id as string,
+      user_id: localStorage.getItem('id')!,
+      sentQuestionTime: question.serverTime,
+    }
+
+
     setDisable(true)
     if(!disabled) {
       setSelectControl((prevState) => {
@@ -69,8 +63,7 @@ const Question: FC = () => {
       })
 
       if(session && id) {
-        console.log('should post answer')
-        PostAnswer(id_clicked, session as string, id as string)
+        PostAnswer(anwserData)
           .then(res => {
             console.log('OK')
           })
@@ -82,6 +75,13 @@ const Question: FC = () => {
   }
 
   //TODO Arrumar esquema de resposta de perguntas
+  if(!question) {
+    return (
+      <h1>
+        Loading Question
+      </h1>
+    )
+  }
 
   return (
     <Suspense fallback={<h1 style={{ color: 'white' }} > Loading... </h1> } >

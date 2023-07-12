@@ -2,11 +2,12 @@ import React, { FormEvent, ReactElement, useRef } from 'react'
 import Layout from '../components/Layouts/indexLayout'
 import { useRouter } from 'next/router'
 
+import Input from '../components/Input'
+
 import { NextPageWithLayout } from './_app'
 
 export const Home: NextPageWithLayout = (pageProps) => {
 
-  console.log({pageProps})
   const input = useRef<HTMLInputElement>(null)
   const router = useRouter()
 
@@ -19,10 +20,11 @@ export const Home: NextPageWithLayout = (pageProps) => {
 
   return (
     <div>
+      <h2 style={{ color: 'white', marginBottom: '10px', }} > Quiz Sistemas Distribuidos </h2>
       <form onSubmit={handler} >
         <label htmlFor='session' style={{ color: 'white' }} >
           quiz-sd.vercel.app/game/
-          <input ref={input} id="session" name="session" />
+          <Input ref={input} id="session" name="session" />
         </label>
       </form>
     </div>

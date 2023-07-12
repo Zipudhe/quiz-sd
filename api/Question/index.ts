@@ -8,17 +8,24 @@ export type Question = {
 }
 
 interface QuestionResponse {
-  question: Question
+  question: Question,
+  requestServerTime: number
 }
 
-export const PostAnswer = (answer: string, session: string, question: string) => {
-  return api.post('/answer', { session, question, answer })
+interface IPostAnswer {
+  correct: boolean,
+  session: string,
+  question: string,
+  user_id: string
+}
+
+export const PostAnswer = (answer: IPostAnswer) => {
+  return api.post('/answer', answer)
 }
 
 export const GetQuestion = async () => {
   return api.get<QuestionResponse>('/question')
     .then(({ data }) => {
-      return data.question
+      return data
     })
-    .then(question => question)
 }

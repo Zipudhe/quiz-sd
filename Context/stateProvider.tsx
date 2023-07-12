@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 
 import { State } from "../components/Indicator"
 
-type StateType = {
+export type StateType = {
   [x: string]:  State
 }
 
@@ -12,18 +12,17 @@ type StateProvider = [
   setState: React.Dispatch<React.SetStateAction<StateType>>
 ]
 
+export const defaultState = {
+  '1': 'connected',
+  '2': 'disconnected',
+  '3': 'disconnected',
+  '4': 'disconnected'
+} as StateType
+
 export const StateContext = createContext<StateProvider>({}  as StateProvider)
 
 
 const StateProvider: FC<{ children: ReactNode }> = ({ children }) => {
-
-  const defaultState = {
-    '1': 'connected',
-    '2': 'disconnected',
-    '3': 'disconnected',
-    '4': 'disconnected'
-  } as StateType
-  
   var state = useState<StateType>(defaultState)
 
   return (
